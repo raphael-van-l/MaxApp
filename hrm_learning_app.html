@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Management - Lern-App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .countdown {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 0;
+            min-height: 600px;
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-right: 2px solid #e0e0e0;
+            overflow-y: auto;
+            max-height: 800px;
+        }
+
+        .sidebar h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .topic-item {
+            background: white;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .topic-item:hover {
+            transform: translateX(5px);
+            border-left-color: #667eea;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .topic-item.active {
+            background: #667eea;
+            color: white;
+            border-left-color: #764ba2;
+        }
+
+        .topic-number {
+            font-weight: bold;
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+
+        .content-area {
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 800px;
+        }
+
+        .topic-header {
+            margin-bottom: 25px;
+        }
+
+        .topic-header h2 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .topic-header .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .flashcard {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .flashcard:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .flashcard-question {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .flashcard-answer {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        .flashcard-answer.hidden {
+            filter: blur(8px);
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .toggle-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        .chatbot {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 2px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chatbot h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 500px;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            line-height: 1.5;
+        }
+
+        .chat-message.user {
+            background: #667eea;
+            color: white;
+            margin-left: 20px;
+        }
+
+        .chat-message.assistant {
+            background: #f0f0f0;
+            color: #333;
+            margin-right: 20px;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 0.95em;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .send-btn:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 0.95em;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            flex: 1;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        strong {
+            color: #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .typing {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 HR Management Klausur-Vorbereitung</h1>
+            <p>Kompakte Zusammenfassung aller wichtigen Themen</p>
+            <div class="countdown" id="countdown">⏰ Klausur in 4 Tagen - Viel Erfolg!</div>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number" id="cardsStudied">0</div>
+                    <div class="stat-label">Karten gelernt</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="totalCards">150+</div>
+                    <div class="stat-label">Gesamt Karten</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="progressPercent">0%</div>
+                    <div class="stat-label">Fortschritt</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Sidebar Navigation -->
+            <div class="sidebar">
+                <h3>📑 Themen</h3>
+                <div class="search-box">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Thema suchen...">
+                </div>
+                <div id="topicsList"></div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="content-area" id="contentArea">
+                <div class="loading">Wähle ein Thema aus der Sidebar...</div>
+            </div>
+
+            <!-- Chatbot -->
+            <div class="chatbot">
+                <h3>💬 Lern-Assistent</h3>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-message assistant">
+                        Hallo! Ich bin dein HR Management Lern-Assistent. Stelle mir Fragen zu den Themen, und ich helfe dir beim Verstehen! 😊
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Frage stellen...">
+                    <button class="send-btn" onclick="sendMessage()">Senden</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Comprehensive HR Management Content
+        const topics = {
+            "Teil 1: Einführung & Strategie": {
+                cards: [
+                    {
+                        q: "Was ist Personalmanagement? (Definition)",
+                        a: "Das betriebliche Personalmanagement befasst sich mit dem arbeitenden Menschen bzw. mit der menschlichen Arbeit in Organisationen. Es umfasst alle Aktivitäten zur Gewinnung, Entwicklung, Führung und Betreuung von Mitarbeitern zur Erreichung der Unternehmensziele."
+                    },
+                    {
+                        q: "Employee Life Cycle - Welche Phasen gibt es?",
+                        a: "1. <strong>Attract</strong> (Anziehen/Recruiting)<br>2. <strong>Onboard</strong> (Einarbeitung)<br>3. <strong>Develop</strong> (Entwicklung)<br>4. <strong>Retain</strong> (Bindung)<br>5. <strong>Offboard</strong> (Austritt/Exit)<br><br>Jede Phase erfordert spezifische HR-Maßnahmen."
+                    },
+                    {
+                        q: "Welche Menschenbilder haben sich im HR historisch entwickelt?",
+                        a: "<ul><li><strong>Economic Man</strong> (~1900): Rational, monetär motiviert</li><li><strong>Social Man</strong>: Soziale Bedürfnisse im Fokus</li><li><strong>Self-actualizing Man</strong>: Selbstverwirklichung</li><li><strong>Complex Man</strong>: Vielschichtig, situationsabhängig</li><li><strong>Virtual Man</strong>: Digital vernetzt, flexibel</li></ul>"
+                    },
+                    {
+                        q: "Strategische vs. Operative Personalarbeit - Unterschiede?",
+                        a: "<strong>Strategisch:</strong><ul><li>Langfristige Ausrichtung</li><li>Gestaltung von HR-Systemen</li><li>Talentmanagement</li><li>Organisationsentwicklung</li></ul><strong>Operativ:</strong><ul><li>Tagesgeschäft (Verwaltung)</li><li>Recruiting-Prozesse</li><li>Lohn-/Gehaltsabrechnung</li><li>Zeiterfassung</li></ul>"
+                    },
+                    {
+                        q: "Was sind die 3 Merkmale einer 'richtigen' Personalstrategie?",
+                        a: "1. <strong>Potenzialorientierung</strong>: Fokus auf Entwicklung und Nutzung von Mitarbeiterpotenzial<br>2. <strong>Komplexitätsreduktion</strong>: Vereinfachung durch klare Prioritäten<br>3. <strong>Aktionsorientierung</strong>: Konkrete Umsetzung statt nur Planung"
+                    },
+                    {
+                        q: "Personalstrategie und Unternehmensstrategie - Beziehung?",
+                        a: "<strong>3 Ansätze:</strong><br>1. <strong>Personalstrategie folgt Unternehmensstrategie</strong> (reaktiv)<br>2. <strong>Personalstrategie beeinflusst Unternehmensstrategie</strong> (proaktiv)<br>3. <strong>Wechselseitige Beeinflussung</strong> (interaktiv)<br><br>Ideal: Strategische Integration beider Bereiche"
+                    },
+                    {
+                        q: "HR Business Partner Modell - Aufbau?",
+                        a: "<strong>3 Säulen:</strong><br>1. <strong>Shared Services</strong>: Standardisierte, effiziente Prozesse (z.B. Payroll)<br>2. <strong>Centers of Expertise</strong>: HR-Experten für spezielle Themen (z.B. Recruiting, Entwicklung)<br>3. <strong>HR Business Partner</strong>: Strategische Partner für Geschäftsbereiche"
+                    },
+                    {
+                        q: "Theorieansätze im Personalmanagement - Überblick?",
+                        a: "<strong>Ökonomisch-orientierte Ansätze:</strong> Kosten-Nutzen, Produktionsfaktoren<br><strong>Verhaltensorientierte Ansätze:</strong><ul><li>Motivationstheorien (Inhalts- & Prozesstheorien)</li><li>Führungstheorien (Eigenschaften, Verhalten, Situation)</li></ul>"
+                    },
+                    {
+                        q: "Aktuelle HR Trends 2025?",
+                        a: "<ul><li><strong>Digitale Transformation</strong>: KI, Automatisierung</li><li><strong>Fachkräftemangel</strong>: War for Talents</li><li><strong>Diversity & Inclusion</strong></li><li><strong>Demografischer Wandel</strong></li><li><strong>New Work & Flexibilität</strong></li><li><strong>Nachhaltigkeit & Purpose</strong></li><li><strong>Generationenmanagement</strong> (Gen Z)</li></ul>"
+                    },
+                    {
+                        q: "Aufbauorganisation HR - Eingliederungsmöglichkeiten?",
+                        a: "1. <strong>Zentralisiert</strong>: Eine zentrale HR-Abteilung<br>2. <strong>Dezentralisiert</strong>: HR in jedem Geschäftsbereich<br>3. <strong>Hybrid</strong>: Mix aus zentralen und dezentralen Funktionen<br><br>Wahl abhängig von Unternehmensgröße, -struktur und -strategie"
+                    }
+                ]
+            },
+            "Teil 2: Planung & Controlling": {
+                cards: [
+                    {
+                        q: "Was ist Personalplanung?",
+                        a: "Personalplanung ist die <strong>vorausschauende Gestaltung</strong> des Personalbestands. Ziel: Die richtige Anzahl von Mitarbeitern mit den richtigen Qualifikationen zur richtigen Zeit am richtigen Ort bereitzustellen."
+                    },
+                    {
+                        q: "5 Schritte der Personalbedarfsplanung?",
+                        a: "1. <strong>Überprüfung</strong> des aktuellen Stellenplans<br>2. <strong>Sammeln</strong> von Informationen für künftige Planung<br>3. <strong>Aufstellung</strong> des neuen Stellenplans (Soll-Kennziffern)<br>4. <strong>Aufstellung</strong> des Stellenbesetzungsplans<br>5. <strong>Ermittlung</strong> unbesetzter Stellen und nicht einsetzbarer Mitarbeiter"
+                    },
+                    {
+                        q: "Brutto- vs. Nettopersonalbedarf?",
+                        a: "<strong>Bruttopersonalbedarf:</strong> Gesamtbedarf an Arbeitskräften (Soll-Zustand)<br><br><strong>Nettopersonalbedarf:</strong> Differenz zwischen Bruttobedarf und IST-Bestand<br><br>Formel: Nettobedarf = Bruttobedarf - IST-Bestand + Abgänge - Zugänge"
+                    },
+                    {
+                        q: "Unterdeckung vs. Überdeckung - Maßnahmen?",
+                        a: "<strong>Unterdeckung (zu wenig Personal):</strong><ul><li>Neueinstellungen</li><li>Überstunden</li><li>Leiharbeit</li><li>Outsourcing</li></ul><strong>Überdeckung (zu viel Personal):</strong><ul><li>Kurzarbeit</li><li>Abbau Überstunden</li><li>Versetzung</li><li>Frühpensionierung</li><li>Kündigung</li></ul>"
+                    },
+                    {
+                        q: "Was ist Personalcontrolling?",
+                        a: "Personalcontrolling ist die <strong>systematische Erfassung, Analyse und Steuerung</strong> personalwirtschaftlicher Prozesse. Es dient der:<ul><li>Planung</li><li>Kontrolle</li><li>Information</li><li>Steuerung</li></ul>von Personal-Aktivitäten zur Zielerreichung."
+                    },
+                    {
+                        q: "Kennzahlen im Personalcontrolling - Beispiele?",
+                        a: "<strong>Kostenorientiert:</strong><ul><li>Personalkosten-Quote</li><li>Kosten pro Mitarbeiter</li></ul><strong>Leistungsorientiert:</strong><ul><li>Umsatz pro Mitarbeiter</li><li>Produktivität</li></ul><strong>Prozessorientiert:</strong><ul><li>Time-to-Hire</li><li>Fluktuationsrate</li><li>Krankenquote</li></ul>"
+                    },
+                    {
+                        q: "2 Grundsätze im Controlling?",
+                        a: "1. <strong>'Nur das, was man auch messen kann, kann man auch managen'</strong><br>→ Quantifizierung wichtig<br><br>2. <strong>'Nicht alles, was zählbar ist, zählt – nicht alles, was zählt, ist auch zählbar'</strong><br>→ Qualitative Aspekte beachten (z.B. Motivation, Kultur)"
+                    },
+                    {
+                        q: "Personalstrukturanalyse - Was wird analysiert?",
+                        a: "<ul><li><strong>Altersstruktur</strong></li><li><strong>Qualifikationsstruktur</strong></li><li><strong>Geschlechterverteilung</strong></li><li><strong>Betriebszugehörigkeit</strong></li><li><strong>Hierarchieebenen</strong></li><li><strong>Teilzeit/Vollzeit-Verhältnis</strong></li></ul>Ziel: Erkennen von Risiken und Chancen"
+                    },
+                    {
+                        q: "Personaleinsatzplanung - Ziele?",
+                        a: "<strong>Optimale Zuordnung</strong> von Mitarbeitern zu Aufgaben unter Berücksichtigung von:<ul><li>Qualifikationen</li><li>Verfügbarkeit</li><li>Arbeitszeiten</li><li>Kosten</li><li>Mitarbeiterwünschen</li></ul><br>Balance zwischen Wirtschaftlichkeit und Mitarbeiterzufriedenheit"
+                    },
+                    {
+                        q: "Welche Planungsebenen gibt es?",
+                        a: "1. <strong>Strategische Planung</strong>: Langfristig (5+ Jahre)<br>2. <strong>Taktische Planung</strong>: Mittelfristig (1-5 Jahre)<br>3. <strong>Operative Planung</strong>: Kurzfristig (<1 Jahr)<br><br>Je strategischer, desto unkonkreter; je operativer, desto detaillierter"
+                    }
+                ]
+            },
+            "Teil 3: Entwicklung & Auswahl": {
+                cards: [
+                    {
+                        q: "4 Schritte der Personalauswahl?",
+                        a: "1. <strong>Arbeits- und Anforderungsanalyse</strong><br>2. <strong>Stellenbeschreibung</strong> erstellen<br>3. <strong>Anforderungsprofil</strong> definieren<br>4. <strong>Qualifikationsprofil</strong> der Kandidaten prüfen<br><br>Dann folgt der Auswahlprozess (Bewerbung, Interview, Assessment)"
+                    },
+                    {
+                        q: "Stellenbeschreibung - Inhalte?",
+                        a: "<ul><li><strong>Stellenbezeichnung</strong></li><li><strong>Einordnung</strong> in Organisation</li><li><strong>Aufgaben & Tätigkeiten</strong></li><li><strong>Kompetenzen & Verantwortung</strong></li><li><strong>Zusammenarbeit</strong> (intern/extern)</li><li><strong>Arbeitsmittel</strong></li></ul>"
+                    },
+                    {
+                        q: "Anforderungsprofil vs. Qualifikationsprofil?",
+                        a: "<strong>Anforderungsprofil:</strong> Was die <u>Stelle</u> erfordert<br>→ Fachliche, methodische, soziale Kompetenzen<br><br><strong>Qualifikationsprofil:</strong> Was der <u>Bewerber</u> mitbringt<br>→ Ausbildung, Erfahrung, Fähigkeiten<br><br><strong>Matching</strong>: Abgleich beider Profile"
+                    },
+                    {
+                        q: "Methoden der Arbeitsanalyse?",
+                        a: "1. <strong>Arbeitsplatzanalytisch-empirisch</strong>: Beobachtung, Messung am Arbeitsplatz<br>2. <strong>Erfahrungsgeleitet-intuitiv</strong>: Experteneinschätzung<br>3. <strong>Personenbezogen-empirisch</strong>: Befragung aktueller Stelleninhaber"
+                    },
+                    {
+                        q: "Was ist Personalentwicklung?",
+                        a: "Personalentwicklung umfasst alle <strong>Maßnahmen zur Förderung von Kompetenzen</strong> und Potenzial der Mitarbeiter:<ul><li>Fachliche Weiterbildung</li><li>Methodenkompetenz</li><li>Soziale Kompetenz</li><li>Führungskompetenz</li></ul>Ziel: Mitarbeiter befähigen, aktuelle und zukünftige Aufgaben zu meistern"
+                    },
+                    {
+                        q: "Personalentwicklungsmaßnahmen - Kategorien?",
+                        a: "<strong>On-the-job:</strong> Lernen am Arbeitsplatz (Job Rotation, Mentoring)<br><strong>Near-the-job:</strong> Arbeitsplatznah (Workshops, Qualitätszirkel)<br><strong>Off-the-job:</strong> Extern (Seminare, Trainings, Studium)<br><strong>Into-the-job:</strong> Vorbereitung auf neue Position (Trainee-Programme)"
+                    },
+                    {
+                        q: "Was ist Employer Branding?",
+                        a: "Employer Branding ist der <strong>Aufbau und die Pflege einer Arbeitgebermarke</strong>. Ziele:<ul><li>Attraktivität als Arbeitgeber steigern</li><li>Talente anziehen (Recruiting)</li><li>Mitarbeiter binden (Retention)</li><li>Positive Unternehmenskultur kommunizieren</li></ul><br>Kernfrage: <em>'Warum sollte jemand hier arbeiten wollen?'</em>"
+                    },
+                    {
+                        q: "Employee Value Proposition (EVP)?",
+                        a: "Das <strong>Wertversprechen an Mitarbeiter</strong> – was bietet der Arbeitgeber?<br><br>Komponenten:<ul><li>Vergütung & Benefits</li><li>Entwicklungsmöglichkeiten</li><li>Arbeitskultur</li><li>Work-Life-Balance</li><li>Purpose & Sinnhaftigkeit</li></ul>"
+                    },
+                    {
+                        q: "Auswahlverfahren - Welche gibt es?",
+                        a: "<ul><li><strong>Bewerbungsunterlagen</strong>-Analyse</li><li><strong>Telefoninterview</strong></li><li><strong>Strukturiertes Interview</strong></li><li><strong>Assessment Center</strong></li><li><strong>Eignungstests</strong> (Persönlichkeit, Intelligenz)</li><li><strong>Probearbeit/Praktikum</strong></li><li><strong>Referenzen</strong></li></ul>"
+                    },
+                    {
+                        q: "Onboarding - Phasen und Bedeutung?",
+                        a: "<strong>Phasen:</strong><br>1. <strong>Preboarding</strong>: Vor Arbeitsantritt<br>2. <strong>Orientation</strong>: Erste Tage/Wochen<br>3. <strong>Integration</strong>: Erste Monate<br><br><strong>Bedeutung:</strong> Gutes Onboarding erhöht Produktivität, Bindung und reduziert Frühfluktuation um bis zu 50%"
+                    }
+                ]
+            },
+            "Teil 5: Betreuung & Abbau": {
+                cards: [
+                    {
+                        q: "Operative Personalbetreuung - Aufgaben?",
+                        a: "<ul><li><strong>Vertragsmanagement</strong></li><li><strong>Lohn-/Gehaltsabrechnung</strong></li><li><strong>Zeiterfassung</strong></li><li><strong>Urlaubsverwaltung</strong></li><li><strong>Zeugnisse</strong></li><li><strong>Bescheinigungen</strong></li><li><strong>Personalakten</strong></li></ul><br>Oft als Shared Service organisiert"
+                    },
+                    {
+                        q: "Personalfreisetzung - Instrumente?",
+                        a: "<strong>Zeitlich begrenzt:</strong><ul><li>Kurzarbeit</li><li>Abbau Überstunden/Urlaub</li><li>Unbezahlter Urlaub</li></ul><strong>Dauerhaft:</strong><ul><li>Natürliche Fluktuation</li><li>Versetzung</li><li>Outplacement</li><li>Altersteilzeit</li><li>Aufhebungsverträge</li><li>Kündigungen</li></ul>"
+                    },
+                    {
+                        q: "Sozialverträglicher Personalabbau?",
+                        a: "Maßnahmen:<ul><li><strong>Einstellungsstopp</strong></li><li><strong>Frühpensionierung</strong></li><li><strong>Freiwilligenprogramme</strong></li><li><strong>Outplacement-Beratung</strong></li><li><strong>Qualifizierung</strong> für neue Jobs</li><li><strong>Transfergesellschaften</strong></li></ul><br>Ziel: Soziale Härten vermeiden"
+                    },
+                    {
+                        q: "Teilzeitmodelle - Welche gibt es?",
+                        a: "<ul><li><strong>Klassische Teilzeit</strong>: Reduzierte Wochenstunden</li><li><strong>Job-Sharing</strong>: 2 Personen teilen eine Vollzeitstelle</li><li><strong>Altersteilzeit</strong>: Blockmodell oder kontinuierlich</li><li><strong>Sabbatical</strong>: Längere Auszeit</li></ul><br>Wichtig: Klare Vereinbarungen zu Arbeitszeit und Erreichbarkeit"
+                    },
+                    {
+                        q: "Vergütungssysteme - Komponenten?",
+                        a: "<strong>Grundvergütung:</strong> Fixes Gehalt<br><strong>Variable Vergütung:</strong> Bonus, Provision, Tantieme<br><strong>Benefits:</strong> Firmenwagen, Altersvorsorge, Gesundheit<br><strong>Nicht-monetäre Anreize:</strong> Flexibilität, Entwicklung, Anerkennung"
+                    },
+                    {
+                        q: "Arbeitszeit-Modelle?",
+                        a: "<ul><li><strong>Vollzeit</strong> (Standard 40h)</li><li><strong>Teilzeit</strong></li><li><strong>Gleitzeit</strong></li><li><strong>Vertrauensarbeitszeit</strong></li><li><strong>Schichtarbeit</strong></li><li><strong>Home Office / Remote</strong></li><li><strong>Hybrides Arbeiten</strong></li><li><strong>4-Tage-Woche</strong></li></ul>"
+                    },
+                    {
+                        q: "Retention Management - Ziele und Maßnahmen?",
+                        a: "<strong>Ziel:</strong> Mitarbeiterbindung erhöhen, Fluktuation reduzieren<br><br><strong>Maßnahmen:</strong><ul><li>Attraktive Vergütung</li><li>Entwicklungsmöglichkeiten</li><li>Gute Führung</li><li>Work-Life-Balance</li><li>Wertschätzende Kultur</li><li>Sinnhafte Arbeit</li></ul>"
+                    },
+                    {
+                        q: "Fluktuationsrate berechnen?",
+                        a: "<strong>Formel:</strong><br>Fluktuationsrate = (Anzahl Abgänge / Durchschnittlicher Personalbestand) × 100%<br><br><strong>Beispiel:</strong><br>15 Abgänge bei 200 Mitarbeitern = 7,5% Fluktuation<br><br>Benchmark: 5-15% je nach Branche"
+                    },
+                    {
+                        q: "Exit-Management - Warum wichtig?",
+                        a: "<strong>Gründe:</strong><ul><li>Feedback zu Verbesserungspotenzialen</li><li>Wissenstransfer sichern</li><li>Positive Trennung (Arbeitgeber-Image)</li><li>Boomerang-Hiring ermöglichen</li><li>Alumni-Netzwerk aufbauen</li></ul><br>Exit-Interviews sind wertvolle Quelle für Insights"
+                    },
+                    {
+                        q: "Gesundheitsmanagement im Betrieb?",
+                        a: "<strong>Betriebliches Gesundheitsmanagement (BGM):</strong><ul><li>Ergonomische Arbeitsplätze</li><li>Sportangebote</li><li>Gesundheitschecks</li><li>Mental Health Support</li><li>Stressmanagement</li><li>Gesunde Ernährung</li></ul><br>ROI: Weniger Krankheitstage, höhere Produktivität"
+                    }
+                ]
+            },
+            "Teil 7: Psychologische Grundlagen": {
+                cards: [
+                    {
+                        q: "Wahrnehmung und Kognition - Relevanz für Führung?",
+                        a: "<strong>Wahrnehmung ist selektiv und subjektiv:</strong><ul><li>Jeder nimmt anders wahr</li><li>Filter durch Erfahrung, Erwartung, Emotion</li><li>Führungskräfte müssen sich dessen bewusst sein</li></ul><br><strong>Konsequenz:</strong> Aktives Zuhören, Perspektivwechsel, Feedback einholen"
+                    },
+                    {
+                        q: "Kommunikation - Wie viel Prozent der Arbeitszeit?",
+                        a: "Führungskräfte verbringen <strong>70-80% ihrer Arbeitszeit mit Kommunikation</strong>:<ul><li>Meetings</li><li>E-Mails</li><li>Telefonate</li><li>Mitarbeitergespräche</li><li>Präsentationen</li></ul><br>Deshalb: Kommunikationskompetenz ist zentral!"
+                    },
+                    {
+                        q: "4-Ohren-Modell (Schulz von Thun)?",
+                        a: "Jede Nachricht hat <strong>4 Ebenen</strong>:<br>1. <strong>Sachinhalt</strong>: Worüber informiere ich?<br>2. <strong>Selbstoffenbarung</strong>: Was gebe ich von mir preis?<br>3. <strong>Beziehung</strong>: Wie stehe ich zum anderen?<br>4. <strong>Appell</strong>: Was will ich erreichen?<br><br>Führungskräfte sollten auf allen Ebenen klar kommunizieren"
+                    },
+                    {
+                        q: "Motivation - Inhaltstheorien vs. Prozesstheorien?",
+                        a: "<strong>Inhaltstheorien:</strong> <em>WELCHE</em> Motive gibt es?<ul><li>Maslow: Bedürfnispyramide</li><li>Herzberg: Zwei-Faktoren-Theorie</li><li>McClelland: Leistungs-, Macht-, Anschlussmotiv</li></ul><strong>Prozesstheorien:</strong> <em>WIE</em> entsteht Motivation?<ul><li>Erwartungs-Valenz-Theorie (Vroom)</li><li>Zielsetzungstheorie (Locke)</li></ul>"
+                    },
+                    {
+                        q: "Maslows Bedürfnispyramide - 5 Stufen?",
+                        a: "Von unten nach oben:<br>1. <strong>Physiologische Bedürfnisse</strong> (Essen, Schlaf)<br>2. <strong>Sicherheitsbedürfnisse</strong> (Job, Gesundheit)<br>3. <strong>Soziale Bedürfnisse</strong> (Zugehörigkeit)<br>4. <strong>Wertschätzung</strong> (Anerkennung)<br>5. <strong>Selbstverwirklichung</strong> (Potenzial entfalten)<br><br>Erst wenn untere Stufen erfüllt, werden höhere relevant"
+                    },
+                    {
+                        q: "Herzbergs Zwei-Faktoren-Theorie?",
+                        a: "<strong>Hygienefaktoren</strong> (verhindern Unzufriedenheit):<ul><li>Gehalt</li><li>Arbeitsbedingungen</li><li>Sicherheit</li><li>Unternehmenskultur</li></ul><strong>Motivatoren</strong> (schaffen Zufriedenheit):<ul><li>Anerkennung</li><li>Verantwortung</li><li>Entwicklung</li><li>Erfolg</li></ul><br>Wichtig: Beide Faktoren beachten!"
+                    },
+                    {
+                        q: "Gruppendynamik - Phasen nach Tuckman?",
+                        a: "1. <strong>Forming</strong>: Orientierung, Höflichkeit<br>2. <strong>Storming</strong>: Konflikte, Machtkämpfe<br>3. <strong>Norming</strong>: Regeln, Zusammenhalt<br>4. <strong>Performing</strong>: Produktivität, Synergie<br>5. <strong>Adjourning</strong>: Auflösung<br><br>Führungskräfte müssen Phasen erkennen und entsprechend agieren"
+                    },
+                    {
+                        q: "Emotionale Intelligenz - 5 Komponenten nach Goleman?",
+                        a: "1. <strong>Selbstwahrnehmung</strong>: Eigene Gefühle erkennen<br>2. <strong>Selbstregulation</strong>: Emotionen steuern<br>3. <strong>Motivation</strong>: Sich selbst antreiben<br>4. <strong>Empathie</strong>: Gefühle anderer verstehen<br>5. <strong>Soziale Kompetenz</strong>: Beziehungen gestalten<br><br>Emotional intelligente Führung ist erfolgreicher"
+                    },
+                    {
+                        q: "Konflikte - Eskalationsstufen nach Glasl?",
+                        a: "<strong>9 Stufen:</strong><br>1-3: Win-Win möglich (Verhärtung, Debatte, Taten)<br>4-6: Win-Lose (Image, Gesichtsverlust, Drohung)<br>7-9: Lose-Lose (Begrenzte Schläge, Zersplitterung, Gemeinsam in den Abgrund)<br><br>Je früher Intervention, desto besser Lösung"
+                    },
+                    {
+                        q: "5 Faktoren der Arbeitsmotivation (Hackman & Oldham)?",
+                        a: "1. <strong>Arbeitsweise, Aufgabenanforderungen & Technologie</strong><br>2. <strong>Mitarbeiter</strong> (Persönlichkeit, Fähigkeiten)<br>3. <strong>Kollegen</strong> (Team, Zusammenarbeit)<br>4. <strong>Führende</strong> (Führungsstil, Support)<br>5. <strong>Organisationskultur und -klima</strong><br><br>Alle Faktoren beeinflussen Motivation"
+                    }
+                ]
+            },
+            "Teil 8: Führungsinstrumente": {
+                cards: [
+                    {
+                        q: "Was sind Führungsinstrumente?",
+                        a: "Führungsinstrumente sind <strong>konkrete Mittel und Methoden</strong>, mit denen Führungskräfte:<ul><li>Verhalten beeinflussen</li><li>Leistung steuern</li><li>Zusammenarbeit gestalten</li></ul><br>Sie übersetzen Führung von Haltung in <strong>beobachtbares Handeln</strong>"
+                    },
+                    {
+                        q: "Führungsstil vs. Führungsinstrument - Unterschied?",
+                        a: "<strong>Führungsstil:</strong> Das <em>'WIE'</em> – grundlegende Haltung und typisches Verhalten<br><br><strong>Führungsinstrument:</strong> Das <em>'WOMIT'</em> – konkrete, situationsabhängige Maßnahmen<br><br>Beispiel: Kooperativer Stil (WIE) nutzt Teambesprechungen (WOMIT)"
+                    },
+                    {
+                        q: "Monolog-orientierte Führungsinstrumente - Beispiele?",
+                        a: "<ul><li><strong>Anweisung/Delegation</strong>: Klare Aufgabenzuweisung</li><li><strong>Information</strong>: Sachverhalte mitteilen</li><li><strong>Ankündigung</strong>: Bevorstehende Änderungen</li><li><strong>Anerkennung/Kritik</strong>: Feedback geben</li></ul><br>Charakteristik: Einseitige Kommunikation"
+                    },
+                    {
+                        q: "Dialog-orientierte Führungsinstrumente - Beispiele?",
+                        a: "<ul><li><strong>Mitarbeitergespräch</strong>: Jahres-, Entwicklungs-, Zielgespräch</li><li><strong>Coaching</strong>: Individuelle Entwicklung</li><li><strong>Feedback-Gespräch</strong>: Wechselseitiger Austausch</li><li><strong>Konfliktgespräch</strong>: Probleme lösen</li><li><strong>Meeting/Besprechung</strong>: Team-Dialog</li></ul>"
+                    },
+                    {
+                        q: "Mitarbeitergespräch - Arten und Zwecke?",
+                        a: "<strong>Jahresgespräch:</strong> Leistungsbeurteilung, Rückblick<br><strong>Zielvereinbarungsgespräch:</strong> Ziele für nächste Periode<br><strong>Entwicklungsgespräch:</strong> Karriere, Weiterbildung<br><strong>Feedbackgespräch:</strong> Kontinuierliche Rückmeldung<br><strong>Kritikgespräch:</strong> Probleme ansprechen<br><br>Alle sollten strukturiert und vorbereitet sein"
+                    },
+                    {
+                        q: "Delegation - Vorteile und Grenzen?",
+                        a: "<strong>Vorteile:</strong><ul><li>Entlastung der Führungskraft</li><li>Entwicklung der Mitarbeiter</li><li>Motivation durch Vertrauen</li><li>Schnellere Entscheidungen</li></ul><strong>Grenzen:</strong><ul><li>Gesamtverantwortung bleibt</li><li>Mitarbeiter muss kompetent sein</li><li>Strategische Entscheidungen nicht delegierbar</li></ul>"
+                    },
+                    {
+                        q: "Feedback-Regeln?",
+                        a: "<strong>Konstruktives Feedback:</strong><ul><li><strong>Konkret</strong> statt allgemein</li><li><strong>Beschreibend</strong> statt bewertend</li><li><strong>Zeitnah</strong></li><li><strong>Ich-Botschaften</strong></li><li><strong>Zukunftsorientiert</strong></li><li><strong>Dosiert</strong> (nicht überladen)</li><li><strong>Nachvollziehbar</strong></li></ul><br>Sandwich-Methode oft hilfreich: Positiv-Kritik-Positiv"
+                    },
+                    {
+                        q: "Zielvereinbarung (MbO - Management by Objectives)?",
+                        a: "<strong>SMART-Ziele:</strong><br><strong>S</strong>pezifisch<br><strong>M</strong>essbar<br><strong>A</strong>kzeptiert/Attraktiv<br><strong>R</strong>ealistisch<br><strong>T</strong>erminiert<br><br>Gemeinsam mit Mitarbeiter vereinbaren, nicht nur vorgeben. Regelmäßig Review-Gespräche"
+                    },
+                    {
+                        q: "Meeting-Management - Erfolgsfaktoren?",
+                        a: "<ul><li><strong>Klare Agenda</strong> vorab</li><li><strong>Definiertes Ziel</strong></li><li><strong>Richtige Teilnehmer</strong></li><li><strong>Zeitlimit</strong> einhalten</li><li><strong>Moderation</strong></li><li><strong>Protokoll</strong> mit Maßnahmen</li><li><strong>Follow-up</strong></li></ul><br>Regel: So wenige Meetings wie möglich, so viele wie nötig"
+                    },
+                    {
+                        q: "Coaching als Führungsinstrument?",
+                        a: "Coaching ist <strong>individuelle Prozessbegleitung</strong> zur Selbstreflexion und Lösungsfindung.<br><br><strong>Nicht:</strong> Ratschläge geben<br><strong>Sondern:</strong> Durch Fragen zur eigenen Lösung führen<br><br>Coaching-Haltung: <em>'Ich helfe dir, es selbst zu lösen'</em> statt <em>'Ich sage dir, was du tun sollst'</em>"
+                    }
+                ]
+            },
+            "Teil 9: Führung 4.0 & Trends": {
+                cards: [
+                    {
+                        q: "Was bedeutet Führung 4.0?",
+                        a: "Führung im Zeitalter der <strong>Digitalisierung und New Work</strong>:<ul><li>Agile Führung</li><li>Virtuelle Teams führen</li><li>Selbstorganisation ermöglichen</li><li>Vernetztes Denken</li><li>Digitale Tools nutzen</li><li>Kontinuierliche Veränderung</li></ul><br>Fokus: Von Kontrolle zu Vertrauen"
+                    },
+                    {
+                        q: "Agile Führung - Prinzipien?",
+                        a: "<ul><li><strong>Servant Leadership</strong>: Führungskraft als Unterstützer</li><li><strong>Empowerment</strong>: Teams befähigen</li><li><strong>Iteration</strong>: Schnelle Lernzyklen</li><li><strong>Transparenz</strong></li><li><strong>Feedback-Kultur</strong></li><li><strong>Flexibilität</strong> statt starre Pläne</li></ul><br>Aus Scrum/Kanban in alle Bereiche übertragen"
+                    },
+                    {
+                        q: "Führung auf Distanz - Herausforderungen?",
+                        a: "<strong>Herausforderungen:</strong><ul><li>Weniger informelle Kommunikation</li><li>Schwierigere Teambildung</li><li>Kontrolle vs. Vertrauen</li><li>Technologie-Abhängigkeit</li></ul><strong>Lösungen:</strong><ul><li>Regelmäßige Video-Calls</li><li>Klare Kommunikation</li><li>Vertrauenskultur</li><li>Virtuelle Teamevents</li><li>Ergebnisorientierung</li></ul>"
+                    },
+                    {
+                        q: "Selbstorganisierte Teams - Rolle der Führung?",
+                        a: "Führungskraft als <strong>Enabler</strong> statt Kontrolleur:<ul><li>Rahmenbedingungen schaffen</li><li>Ressourcen bereitstellen</li><li>Hindernisse beseitigen</li><li>Coaching & Entwicklung</li><li>Vision & Richtung geben</li></ul><br>Team entscheidet <em>WIE</em>, Führung gibt <em>WAS</em> und <em>WARUM</em> vor"
+                    },
+                    {
+                        q: "Generationenmanagement - Herausforderungen?",
+                        a: "<strong>4 Generationen im Unternehmen:</strong><br>• <strong>Baby Boomer</strong>: Loyalität, Hierarchie<br>• <strong>Gen X</strong>: Work-Life-Balance<br>• <strong>Gen Y (Millennials)</strong>: Purpose, Flexibilität<br>• <strong>Gen Z</strong>: Digital Natives, Sinnsuche<br><br>Führung muss unterschiedliche Werte und Erwartungen managen"
+                    },
+                    {
+                        q: "Transformationale Führung - Merkmale?",
+                        a: "<strong>4 I's:</strong><br>1. <strong>Idealized Influence</strong>: Vorbild sein<br>2. <strong>Inspirational Motivation</strong>: Vision begeistern<br>3. <strong>Intellectual Stimulation</strong>: Zum Denken anregen<br>4. <strong>Individualized Consideration</strong>: Individuelle Förderung<br><br>Ziel: Mitarbeiter über sich hinauswachsen lassen"
+                    },
+                    {
+                        q: "Diversität in Teams - Vorteile und Herausforderungen?",
+                        a: "<strong>Vorteile:</strong><ul><li>Kreativität & Innovation</li><li>Unterschiedliche Perspektiven</li><li>Bessere Problemlösung</li><li>Zugang zu diversen Märkten</li></ul><strong>Herausforderungen:</strong><ul><li>Kommunikationsbarrieren</li><li>Potenzielle Konflikte</li><li>Längere Entscheidungsprozesse</li></ul><br>Inklusive Führung ist der Schlüssel"
+                    },
+                    {
+                        q: "Fehlerkultur - Warum wichtig?",
+                        a: "Positive Fehlerkultur bedeutet:<ul><li><strong>Fehler als Lernchance</strong> sehen</li><li>Offener Umgang statt Schuldzuweisung</li><li>Psychologische Sicherheit schaffen</li><li>Experimentieren ermutigen</li></ul><br>Ergebnis: Mehr Innovation, schnelleres Lernen, höheres Vertrauen"
+                    },
+                    {
+                        q: "Change Management - Führungsrolle?",
+                        a: "Führungskräfte sind <strong>Change Agents</strong>:<ul><li><strong>Vision kommunizieren</strong></li><li><strong>Widerstände managen</strong></li><li><strong>Quick Wins schaffen</strong></li><li><strong>Kontinuität sichern</strong></li><li><strong>Vorbild sein</strong></li></ul><br>Modell: Kotter's 8 Schritte oder ADKAR"
+                    },
+                    {
+                        q: "Zukunft der Führung - Trends?",
+                        a: "<ul><li><strong>KI-gestützte Entscheidungen</strong></li><li><strong>Hybrid Leadership</strong> (Remote + Office)</li><li><strong>Purpose-driven Leadership</strong></li><li><strong>Nachhaltige Führung</strong> (ESG)</li><li><strong>Skills-basierte Organisation</strong> statt Hierarchie</li><li><strong>Employee Experience im Fokus</strong></li><li><strong>Kontinuierliches Lernen</strong></li></ul>"
+                    }
+                ]
+            }
+        };
+
+        let currentTopic = null;
+        let cardsStudied = new Set();
+        let currentTopicIndex = 0;
+        const allTopics = Object.keys(topics);
+
+        // Initialize app
+        function init() {
+            renderTopicsList();
+            updateStats();
+            updateCountdown();
+            
+            // Event listeners
+            document.getElementById('searchInput').addEventListener('input', filterTopics);
+            document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+        }
+
+        // Render topics in sidebar
+        function renderTopicsList() {
+            const container = document.getElementById('topicsList');
+            container.innerHTML = '';
+            
+            allTopics.forEach((topic, index) => {
+                const div = document.createElement('div');
+                div.className = 'topic-item';
+                div.innerHTML = `
+                    <div class="topic-number">Teil ${index + 1}</div>
+                    <div>${topic.replace(/^Teil \d+:\s*/, '')}</div>
+                `;
+                div.onclick = () => loadTopic(topic);
+                container.appendChild(div);
+            });
+        }
+
+        // Filter topics by search
+        function filterTopics() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const items = document.querySelectorAll('.topic-item');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(search) ? 'block' : 'none';
+            });
+        }
+
+        // Load topic content
+        function loadTopic(topicName) {
+            currentTopic = topicName;
+            const topicData = topics[topicName];
+            
+            // Update active state in sidebar
+            document.querySelectorAll('.topic-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.textContent.includes(topicName.replace(/^Teil \d+:\s*/, ''))) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Render content
+            const contentArea = document.getElementById('contentArea');
+            contentArea.innerHTML = `
+                <div class="topic-header">
+                    <h2>${topicName}</h2>
+                    <div class="subtitle">${topicData.cards.length} Lernkarten</div>
+                </div>
+                <div id="flashcardsContainer"></div>
+            `;
+            
+            const container = document.getElementById('flashcardsContainer');
+            topicData.cards.forEach((card, index) => {
+                const cardId = `${topicName}-${index}`;
+                const isStudied = cardsStudied.has(cardId);
+                
+                const div = document.createElement('div');
+                div.className = 'flashcard';
+                div.innerHTML = `
+                    <div class="flashcard-question">
+                        <span>❓ ${card.q}</span>
+                        <button class="toggle-btn" onclick="toggleAnswer('answer-${cardId}', '${cardId}')">
+                            ${isStudied ? 'Erneut anzeigen' : 'Antwort zeigen'}
+                        </button>
+                    </div>
+                    <div class="flashcard-answer ${isStudied ? '' : 'hidden'}" id="answer-${cardId}">
+                        ${card.a}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Toggle flashcard answer
+        function toggleAnswer(answerId, cardId) {
+            const answerDiv = document.getElementById(answerId);
+            answerDiv.classList.toggle('hidden');
+            
+            if (!answerDiv.classList.contains('hidden')) {
+                cardsStudied.add(cardId);
+                updateStats();
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const totalCards = Object.values(topics).reduce((sum, topic) => sum + topic.cards.length, 0);
+            const studied = cardsStudied.size;
+            const percent = Math.round((studied / totalCards) * 100);
+            
+            document.getElementById('cardsStudied').textContent = studied;
+            document.getElementById('totalCards').textContent = totalCards;
+            document.getElementById('progressPercent').textContent = percent + '%';
+        }
+
+        // Update countdown
+        function updateCountdown() {
+            const examDate = new Date('2026-02-20');
+            const now = new Date();
+            const diff = examDate - now;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            document.getElementById('countdown').innerHTML = 
+                `⏰ Klausur in ${days} Tagen - Du schaffst das! 💪`;
+        }
+
+        // Chat functionality
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            addChatMessage(message, 'user');
+            input.value = '';
+            
+            // Show typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'chat-message assistant typing';
+            typingDiv.textContent = 'Denke nach...';
+            document.getElementById('chatMessages').appendChild(typingDiv);
+            
+            try {
+                // Call Claude API
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [{
+                            role: 'user',
+                            content: `Du bist ein HR Management Tutor. Beantworte die folgende Frage basierend auf dem Lernmaterial. 
+                            
+Aktuelles Thema: ${currentTopic || 'Alle Themen'}
+
+Frage: ${message}
+
+Gib eine präzise, verständliche Antwort in 2-4 Sätzen. Nutze bei Bedarf Beispiele.`
+                        }]
+                    })
+                });
+                
+                const data = await response.json();
+                typingDiv.remove();
+                
+                if (data.content && data.content[0]) {
+                    const answer = data.content[0].text;
+                    addChatMessage(answer, 'assistant');
+                } else {
+                    throw new Error('Unerwartete API-Antwort');
+                }
+                
+            } catch (error) {
+                typingDiv.remove();
+                addChatMessage('Entschuldigung, ich konnte deine Frage nicht beantworten. Versuche es bitte erneut oder formuliere die Frage anders.', 'assistant');
+            }
+        }
+
+        function addChatMessage(text, sender) {
+            const div = document.createElement('div');
+            div.className = `chat-message ${sender}`;
+            div.textContent = text;
+            
+            const container = document.getElementById('chatMessages');
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
